@@ -1,2 +1,2 @@
 pygobject>=3.18
-mypy-lang
+git+git://github.com/python/mypy.git

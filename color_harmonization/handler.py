@@ -14,4 +14,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-__all__ = ["assistant"] # type: List[str]
+from color_harmonization import global_variables
+from gi.repository import Gtk, Gdk
+from typing import Any
+
+class Handler:
+    def __init__ (self: 'Handler') -> None:
+        pass
+
+    def on_cancel (self: 'Handler', assistant: Gtk.Assistant, user_data: Any = None) -> None:
+        self.on_delete (None, None)
+
+    def on_close (self: 'Handler', assistant: Gtk.Assistant, user_data: Any = None) -> None:
+        self.on_delete (None, None)
+
+    def on_escape (self: 'Handler', assistant: Gtk.Assistant, user_data: Any = None) -> None:
+        self.on_delete (None, None)
+
+    def on_delete (self: 'Handler', widget: Gtk.Widget, event: Gdk.Event,
+                   user_data: 'Any' = None) -> None:
+        global_variables.App.assistant.stop ()

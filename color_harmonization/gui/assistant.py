@@ -14,21 +14,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-import gi
 import warnings
-
-gi.require_version ('Gtk', '3.0')
 from gi.repository import Gtk
+from typing import TypeVar
+from color_harmonization.handler import Handler
 
 class Assistant:
-    def __init__ (self: 'Assistant', handler: 'Handler') -> None:
-        self.builder = Gtk.Builder ()
+    def __init__ (self: 'Assistant', handler: Handler) -> None:
+        self.builder = Gtk.Builder () # type: Gtk.Builder
         warnings.filterwarnings ('ignore')
         self.builder.add_from_file ("color_harmonization/gui/color-harmonization.glade")
         warnings.filterwarnings ('default')
         self.builder.connect_signals (handler)
-        self.assistant = self.builder.get_object ("color-harmonization-assistant")
-
+        self.assistant = self.builder.get_object ("color-harmonization-assistant") # type: Gtk.Assistant
     def run (self: 'Assistant') -> int:
         self.assistant.show_all ()
         Gtk.main ()

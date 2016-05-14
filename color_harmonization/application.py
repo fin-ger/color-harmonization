@@ -14,25 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-from color_harmonization import global_variables
 from color_harmonization.gui.assistant import Assistant
-
-class Handler:
-    def __init__ (self: 'Handler') -> None:
-        pass
-
-    def on_cancel (self: 'Handler', assistant: 'Gtk.Assistant', user_data: 'Any' = None) -> None:
-        self.on_delete (None, None)
-
-    def on_close (self: 'Handler', assistant: 'Gtk.Assistant', user_data: 'Any' = None) -> None:
-        self.on_delete (None, None)
-
-    def on_escape (self: 'Handler', assistant: 'Gtk.Assistant', user_data: 'Any' = None) -> None:
-        self.on_delete (None, None)
-
-    def on_delete (self: 'Handler', widget: 'Gtk.Widget', event: 'Gtk.Event',
-                   user_data: 'Any' = None) -> None:
-        global_variables.Application.assistant.stop ()
+from color_harmonization.handler import Handler
 
 class Application:
     def __init__ (self: 'Application') -> None:

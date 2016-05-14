@@ -20,11 +20,18 @@ init:
 	@which python3 > /dev/null 2>&1 || (echo "python3 is not installed on this system" && exit 1)
 	@which pip3 > /dev/null 2>&1 || (echo "pip3 is not installed on this system" && exit 1)
 	@echo "Installing requirements with pip3..."
-	@pip3 install --user -r requirements.txt
+	@while read package; \
+	do \
+	  line="$$package"; \
+	  [[ "$$line" == git+* ]] && \
+	    line=`echo "$$line" | sed -e 's/git.*\///g' -e 's/.git$$//g'`; \
+	  pip3 freeze 2>/dev/null | grep -P `echo "$$line" | sed 's/>=/.*/g'` > /dev/null 2>&1 || \
+	    pip3 install --user "$$package"; \
+	done < requirements.txt
 
 build: init
 	@echo "Building python package..."
-	@mypy -m color_harmonization
+	@mypy --silent-imports --package color_harmonization
 	@echo "#! /bin/bash" > color-harmonization
 	@echo "/usr/bin/env python3 -m color_harmonization" >> color-harmonization
 	@chmod +x color-harmonization

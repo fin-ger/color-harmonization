@@ -17,13 +17,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import sys
+import gi
+gi.require_version ('Gtk', '3.0')
 
+from typing import List
 from color_harmonization import global_variables
 from color_harmonization.application import Application
 
-def main (argv: str) -> int:
-    global_variables.Application = Application ()
-    return global_variables.Application.run ()
+def main (argv: List[str]) -> int:
+    global_variables.App = Application ()
+    return global_variables.App.run ()
 
 if __name__ == '__main__':
     sys.exit (main (sys.argv))
