@@ -32,5 +32,9 @@ class Handler:
         self.on_delete (None, None)
 
     def on_delete (self: 'Handler', widget: Gtk.Widget, event: Gdk.Event,
-                   user_data: 'Any' = None) -> None:
+                   user_data: Any = None) -> None:
         global_variables.App.assistant.stop ()
+
+    def on_image_file_set (self: 'Handler', file_chooser_button: Gtk.FileChooserButton,
+                           user_data: Any = None) -> None:
+        global_variables.App.assistant.input_image = file_chooser_button.get_filename ()
