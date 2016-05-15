@@ -16,6 +16,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
 
-from typing import Any
+from gi.repository import Gtk
+from color_harmonization.gui.gl_quad_renderer import GLQuadRenderer
+from color_harmonization.gui.gl_widget import GLWidget
+from typing import cast
 
-App = None # type: Any
+class GLImage (GLWidget):
+    def __init__ (self: 'GLImage', gl_major_version: int, gl_minor_version: int) -> None:
+        super ().__init__ (GLQuadRenderer (), gl_major_version, gl_minor_version)
+
+    def set_path (self: 'GLImage', path: str) -> None:
+        cast (GLQuadRenderer, self.renderer).load_texture (path)

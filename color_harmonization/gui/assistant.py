@@ -1,25 +1,28 @@
-# Copyright (C) 2016  David Bögelsack, Fin Christensen
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+'''
+Copyright (C) 2016  David Bögelsack, Fin Christensen
 
-import warnings
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+'''
+
 import glob
 import os
+import warnings
 from gi.repository import Gtk, GdkPixbuf, GLib
 from typing import List, Any
 from color_harmonization.handler import Handler
+from color_harmonization.gui.gl_image import GLImage
 
 class Assistant:
     def __init__ (self: 'Assistant', handler: Handler) -> None:
@@ -39,7 +42,7 @@ class Assistant:
         self.__selected_image_preview = self.__builder.get_object (
             "selected-image-preview"
         ) # type: Gtk.Image
-        self.__harmonized_image = self.__builder.get_object (
+        self.__result_image = self.__builder.get_object (
             "harmonized-image"
         ) # type: Gtk.Image
         self.__progressbar = self.__builder.get_object (
@@ -48,7 +51,15 @@ class Assistant:
         self.__save_button = self.__builder.get_object (
             "save-button"
         ) # type: Gtk.Button
-        self.__unknown_image = "color_harmonization/gui/icon/unknown.svg"
+        self.__images_box = self.__builder.get_object (
+            "images-box"
+        ) # type: Gtk.Box
+        self.__unknown_svg = "color_harmonization/gui/icon/unknown.svg"
+        self.__unknown_png = "color_harmonization/gui/icon/unknown.png"
+        self.original_image = GLImage (3, 3)
+        self.harmonized_image = GLImage (3, 3)
+        self.__images_box.pack_start (self.original_image, True, True, 0)
+        self.__images_box.pack_start (self.harmonized_image, True, True, 0)
         self.input_image = None # type: str
 
     def run (self: 'Assistant') -> int:
@@ -113,7 +124,8 @@ class Assistant:
 
         dialog.destroy ()
 
-        print ("File save location is '{}'".format (newfile))
+        if response == Gtk.ResponseType.OK:
+            print ("File save location is '{}'".format (newfile))
 
     def __load_icons (self: 'Assistant', folder: str, size: int = 16) -> None:
         icons = {
@@ -134,13 +146,15 @@ class Assistant:
         self.__input_image = value
 
         if self.__input_image is None:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale (self.__unknown_image, 400, 200, True)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale (self.__unknown_svg, 400, 200, True)
             self.__selected_image_preview.set_from_pixbuf (pixbuf)
-            self.__harmonized_image.set_from_pixbuf (pixbuf)
+            self.__result_image.set_from_pixbuf (pixbuf)
         else:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale (self.__input_image, 400, 200, True)
             self.__selected_image_preview.set_from_pixbuf (pixbuf)
-            self.__harmonized_image.set_from_pixbuf (pixbuf)
+            self.__result_image.set_from_pixbuf (pixbuf)
+            self.original_image.set_path (self.__input_image)
+            self.harmonized_image.set_path (self.__input_image)
             self.assistant.set_page_complete (
                 self.assistant.get_nth_page (self.assistant.get_current_page ()),
                 True

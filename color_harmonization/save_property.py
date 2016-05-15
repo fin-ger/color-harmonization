@@ -16,6 +16,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
 
-from typing import Any
-
-App = None # type: Any
+#from typing import Any
+#
+#class save_property (property):
+#    def __init__ (self: 'save_property', *args: Any, **kwargs: Any) -> None:
+#        super ().__init__ (*args, **kwargs)
+#        for f in (self.fget, self.fset, self.fdel):
+#            if getattr (f, '__isabstractmethod__', False):
+#                self.__isabstractmethod__ = True
+#                break
