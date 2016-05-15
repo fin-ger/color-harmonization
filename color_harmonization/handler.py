@@ -31,6 +31,9 @@ class Handler:
     def on_escape (self: 'Handler', assistant: Gtk.Assistant, user_data: Any = None) -> None:
         self.on_delete (None, None)
 
+    def on_prepare (self: 'Handler', assistant: Gtk.Assistant, user_data: Any = None) -> None:
+        global_variables.App.assistant.prepare_next_page ()
+
     def on_delete (self: 'Handler', widget: Gtk.Widget, event: Gdk.Event,
                    user_data: Any = None) -> None:
         global_variables.App.assistant.stop ()
@@ -38,3 +41,20 @@ class Handler:
     def on_image_file_set (self: 'Handler', file_chooser_button: Gtk.FileChooserButton,
                            user_data: Any = None) -> None:
         global_variables.App.assistant.input_image = file_chooser_button.get_filename ()
+
+    def on_automatic_configuration_clicked (self: 'Handler', button: Gtk.Button,
+                                            user_data: Any = None) -> None:
+        print ("Automatic configuration clicked")
+
+    def on_sector_chooser_changed (self: 'Handler', combobox: Gtk.ComboBox,
+                                   user_data: Any = None) -> None:
+        value = combobox.get_model ().get (combobox.get_active_iter (), 0)[0]
+        print ("Sector chooser changed to '{}'".format (value))
+
+    def on_harmonize_cancel_clicked (self: 'Handler', button: Gtk.Button,
+                                     user_data: Any = None) -> None:
+        global_variables.App.assistant.cancel_harmonization ()
+
+    def on_save_button_clicked (self: 'Handler', button: Gtk.Button,
+                                user_data: Any = None) -> None:
+        global_variables.App.assistant.save_image ()
