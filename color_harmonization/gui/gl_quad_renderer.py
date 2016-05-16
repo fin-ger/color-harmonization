@@ -52,18 +52,18 @@ class GLQuadRenderer (GLRenderer):
 
         GL.glCompileShader (self.vertex_shader)
         error_log = GL.glGetShaderInfoLog (self.vertex_shader)
-        print ("Vertex shader: {}".format (str (error_log)))
+        print ("Vertex shader: {}".format (error_log.decode ()))
 
         GL.glCompileShader (self.fragment_shader)
         error_log = GL.glGetShaderInfoLog (self.fragment_shader)
-        print ("Fragment shader: {}".format (str (error_log)))
+        print ("Fragment shader: {}".format (error_log.decode ()))
 
         GL.glAttachShader (self.program, self.vertex_shader)
         GL.glAttachShader (self.program, self.fragment_shader)
 
         GL.glLinkProgram (self.program)
         error_log = GL.glGetProgramInfoLog (self.program)
-        print ("Program link: {}".format (str (error_log)))
+        print ("Program link: {}".format (error_log.decode ()))
 
         self.array_buffer = GL.glGenBuffers (1)
         self.vertex_array = GL.glGenVertexArrays (1)
@@ -97,7 +97,7 @@ class GLQuadRenderer (GLRenderer):
         self.__data_texture = 0
 
         GL.glUniformMatrix4fv (self.__uniform_projection, 1, False,
-                            Matrix44.orthogonal_projection (0, 1, 0, 1, 0, 1))
+                               Matrix44.orthogonal_projection (0, 1, 0, 1, 0, 1))
         GL.glUniform1i (self.__uniform_do_harmonization, self.__do_harmonization)
 
         self.__loaded = True
@@ -113,13 +113,26 @@ class GLQuadRenderer (GLRenderer):
         warnings.filterwarnings ('ignore')
         with Image.open (path) as f:
             f.thumbnail ((512, 512))
+            hsv = f.convert ("HSV")
             img = f.convert ("RGBA")
+            h = hsv.getdata (band = 0)
+            s = hsv.getdata (band = 1)
+            hist = [0.0] * 256
+            for idx, hue in enumerate (h):
+                hist[hue] += s[idx]
+
+            hist = [
+                (hsv.size[0] * hsv.size[1] * 256) / float (val)
+                if val > numpy.finfo (float).eps else 0 for val in hist
+            ]
+            print (", ".join ("{:.5f}".format (val) for val in hist))
+
             self.__image_width = img.size[0]
             self.__image_height = img.size[1]
             self.gl_widget.props.width_request = 300
             self.gl_widget.props.height_request = img.size[1] / float (img.size[0]) * 300;
             self.__new_texture = numpy.array (list (img.getdata ()), numpy.uint8)
-        warnings.filterwarnings ('default')
+            warnings.filterwarnings ('default')
 
     def __load_texture (self: 'GLQuadRenderer') -> None:
         img_data = self.__new_texture
