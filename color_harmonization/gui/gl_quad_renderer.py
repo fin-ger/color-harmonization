@@ -25,8 +25,8 @@ from pyrr import Matrix44
 from PIL import Image
 from color_harmonization.gui.gl_widget import GLWidget, GLRenderer
 
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
+#import matplotlib.mlab as mlab
+#import matplotlib.pyplot as plt
 
 class GLQuadRenderer (GLRenderer):
     def __init__ (self: 'GLQuadRenderer') -> None:
