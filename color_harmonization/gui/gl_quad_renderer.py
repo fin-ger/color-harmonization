@@ -25,6 +25,9 @@ from pyrr import Matrix44
 from PIL import Image
 from color_harmonization.gui.gl_widget import GLWidget, GLRenderer
 
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
+
 class GLQuadRenderer (GLRenderer):
     def __init__ (self: 'GLQuadRenderer') -> None:
         super ().__init__ ()
@@ -117,15 +120,16 @@ class GLQuadRenderer (GLRenderer):
             img = f.convert ("RGBA")
             h = hsv.getdata (band = 0)
             s = hsv.getdata (band = 1)
-            hist = [0.0] * 256
+            self.__hist = [0.0] * 256
             for idx, hue in enumerate (h):
-                hist[hue] += s[idx]
+                self.__hist[hue] += s[idx]
 
-            hist = [
-                (hsv.size[0] * hsv.size[1] * 256) / float (val)
-                if val > numpy.finfo (float).eps else 0 for val in hist
+            self.__hist = [
+                val / (hsv.size[0] * hsv.size[1] * 256.0)
+                if val > numpy.finfo (float).eps else 0 for val in self.__hist
             ]
-            print (", ".join ("{:.5f}".format (val) for val in hist))
+
+            print (", ".join ("{:.5f}".format (val) for val in self.__hist))
 
             self.__image_width = img.size[0]
             self.__image_height = img.size[1]
