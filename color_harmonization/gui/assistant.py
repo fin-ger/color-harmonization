@@ -20,9 +20,11 @@ import glob
 import os
 import warnings
 from gi.repository import Gtk, GdkPixbuf, GLib
-from typing import List, Any
+from typing import List, Any, cast
 from color_harmonization.handler import Handler
 from color_harmonization.gui.gl_image import GLImage
+from color_harmonization.gui.hue_sat_wheel_widget import HueSatWheelWidget
+from color_harmonization.gui.gl_quad_renderer import GLQuadRenderer
 
 class Assistant:
     def __init__ (self: 'Assistant', handler: Handler) -> None:
@@ -54,6 +56,20 @@ class Assistant:
         self.__images_box = self.__builder.get_object (
             "images-box"
         ) # type: Gtk.Box
+        self.__harmonization_type_stack = self.__builder.get_object (
+            "harmonization-type-stack"
+        ) # type: Gtk.Stack
+
+        harmonization_types = [
+            "i-type", "V-type", "L-type", "I-type", "T-type", "Y-type", "X-type"
+        ]
+        self.hue_sat_wheels = [] # type: List[HueSatWheelWidget]
+        for htype in harmonization_types:
+            child = HueSatWheelWidget (sector = HueSatWheelWidget.sectors[htype])
+            self.__harmonization_type_stack.add_named (child, htype)
+            self.__harmonization_type_stack.child_set_property (child, "icon-name", htype)
+            self.hue_sat_wheels.append (child)
+
         self.__unknown_svg = "color_harmonization/gui/icon/unknown.svg"
         self.__unknown_png = "color_harmonization/gui/icon/unknown.png"
         self.original_image = GLImage (3, 3)
@@ -108,6 +124,11 @@ class Assistant:
             self.stop ()
 
         dialog.destroy ()
+
+    def set_histogram (self: 'Assistant', hist: List[float]) -> None:
+        for child in self.hue_sat_wheels:
+            child.histogram = hist
+
 
     def save_image (self: 'Assistant') -> None:
         dialog = Gtk.FileChooserDialog (

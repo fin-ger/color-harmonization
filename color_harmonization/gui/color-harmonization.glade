@@ -216,87 +216,22 @@ Choose an image below and click next to start harmonizing the colors of your ima
                 <property name="can_focus">False</property>
                 <property name="transition_type">slide-up-down</property>
                 <child>
-                  <object class="GtkImage" id="image1">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="pixbuf">icon/color_wheel.png</property>
-                  </object>
-                  <packing>
-                    <property name="name">i-type</property>
-                    <property name="icon_name">i-type</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkImage" id="image2">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="pixbuf">icon/color_wheel.png</property>
-                  </object>
-                  <packing>
-                    <property name="name">V-type</property>
-                    <property name="icon_name">V-type</property>
-                    <property name="position">1</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkImage" id="image3">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="pixbuf">icon/color_wheel.png</property>
-                  </object>
-                  <packing>
-                    <property name="name">L-type</property>
-                    <property name="icon_name">L-type</property>
-                    <property name="position">2</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkImage" id="image4">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="pixbuf">icon/color_wheel.png</property>
-                  </object>
-                  <packing>
-                    <property name="name">I-type</property>
-                    <property name="icon_name">I-type</property>
-                    <property name="position">3</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkImage" id="image5">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="pixbuf">icon/color_wheel.png</property>
-                  </object>
-                  <packing>
-                    <property name="name">T-type</property>
-                    <property name="icon_name">T-type</property>
-                    <property name="position">4</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkImage" id="image6">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="pixbuf">icon/color_wheel.png</property>
-                  </object>
-                  <packing>
-                    <property name="name">Y-type</property>
-                    <property name="icon_name">Y-type</property>
-                    <property name="position">5</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkImage" id="image7">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="pixbuf">icon/color_wheel.png</property>
-                  </object>
-                  <packing>
-                    <property name="name">X-type</property>
-                    <property name="icon_name">X-type</property>
-                    <property name="position">6</property>
-                  </packing>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -502,6 +437,9 @@ When done click next.</property>
           <placeholder/>
         </child>
       </object>
+      <packing>
+        <property name="has_padding">False</property>
+      </packing>
     </child>
   </object>
 </interface>

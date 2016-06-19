@@ -24,11 +24,12 @@ from OpenGL import GL
 from pyrr import Matrix44
 from PIL import Image
 from color_harmonization.gui.gl_widget import GLWidget, GLRenderer
-
-#import matplotlib.mlab as mlab
-#import matplotlib.pyplot as plt
+from color_harmonization import global_variables
 
 class GLQuadRenderer (GLRenderer):
+    scale = 2**14
+    log_scale = numpy.log2 (256 * 2**14)
+
     def __init__ (self: 'GLQuadRenderer') -> None:
         super ().__init__ ()
         self.__do_harmonization = False
@@ -120,16 +121,17 @@ class GLQuadRenderer (GLRenderer):
             img = f.convert ("RGBA")
             h = hsv.getdata (band = 0)
             s = hsv.getdata (band = 1)
-            self.__hist = [0.0] * 256
+
+            hist = [0.0] * 256
             for idx, hue in enumerate (h):
-                self.__hist[hue] += s[idx]
+                hist[hue] += s[idx]
 
-            self.__hist = [
-                val / (hsv.size[0] * hsv.size[1] * 256.0)
-                if val > numpy.finfo (float).eps else 0 for val in self.__hist
-            ]
+            hist = numpy.log2 ([
+                (val / (hsv.size[0] * hsv.size[1])) * GLQuadRenderer.scale + 1 for val in hist
+            ])
+            hist = [val / GLQuadRenderer.log_scale for val in hist]
 
-            print (", ".join ("{:.5f}".format (val) for val in self.__hist))
+            global_variables.App.assistant.set_histogram (hist)
 
             self.__image_width = img.size[0]
             self.__image_height = img.size[1]
