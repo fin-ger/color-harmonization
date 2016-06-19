@@ -22,8 +22,8 @@ import colorsys
 import cairocffi
 import cairo
 
-from gi.repository import Gtk
-from typing import List
+from gi.repository import Gtk, Gdk
+from typing import List, Any
 
 DEFAULT_SIZE = 200
 DEFAULT_RING_WIDTH = 10
@@ -78,8 +78,18 @@ class HueSatWheelWidget (Gtk.Misc):
         kwargs.pop ("sector", None)
         kwargs.pop ("rotation", None)
 
+        self.__dragging = False
+        self.width = 0
+        self.height = 0
+
         super ().__init__ (*args, **kwargs)
         self.set_size_request (self.size, self.size)
+        self.add_events (Gdk.EventMask.POINTER_MOTION_MASK |
+                         Gdk.EventMask.BUTTON_PRESS_MASK |
+                         Gdk.EventMask.BUTTON_RELEASE_MASK)
+        self.connect ("motion-notify-event", self.on_motion)
+        self.connect ("button-press-event", self.on_button_press)
+        self.connect ("button-release-event", self.on_button_release)
 
     def __draw_sector (self: 'HueSatWheelWidget', cr: cairocffi.Context,
                        center_x: float, center_y: float) -> None:
@@ -102,20 +112,40 @@ class HueSatWheelWidget (Gtk.Misc):
 
         cr.restore ()
 
-    def do_draw (self: 'HueSatWheelWidget', pycairo_cr: cairo.Context) -> bool:
-        cr = _UNSAFE_pycairo_context_to_cairocffi (pycairo_cr)
-        cr.set_source_rgba (0, 0, 0, 0)
-        cr.paint ()
+    def on_motion (self: 'HueSatWheelWidget',
+                   widget: 'HueSatWheelWidget', event: Gdk.EventMotion) -> bool:
+        if self.__dragging:
+            Gdk.Event.request_motions (event)
+            x = event.x
+            y = event.y
+            center_x = self.get_allocated_width () / 2.
+            center_y = self.get_allocated_height () / 2.
+            dx = x - center_x
+            dy = center_y - y
+            angle = math.atan2 (dx, dy)
 
-        width = self.get_allocated_width ()
-        height = self.get_allocated_height ()
+            if angle < 0:
+                angle += 2 * numpy.pi
 
-        center_x = width / 2.
-        center_y = height / 2.
+            self.rotation = angle - numpy.pi / 2
 
-        outer = (self.size - 4) / 2.
-        inner = outer - self.ring_width
+            self.queue_draw ()
 
+        return False
+
+    def on_button_press (self: 'HueSatWheelWidget',
+                         widget: 'HueSatWheelWidget', event: Gdk.EventButton) -> bool:
+        self.__dragging = True
+        return True
+
+    def on_button_release (self: 'HueSatWheelWidget',
+                           widget: 'HueSatWheelWidget', event: Gdk.EventButton) -> bool:
+        self.__dragging = False
+        return True
+
+    def __draw_ring (self: 'HueSatWheelWidget', cr: cairocffi.Context,
+                     width: int, height: int, center_x: float, center_y: float,
+                     outer: float, inner: float) -> None:
         stride = cairocffi.ImageSurface.format_stride_for_width (cairocffi.FORMAT_ARGB32, width)
         buf = numpy.empty (int (height * stride), dtype = numpy.uint8)
 
@@ -161,10 +191,16 @@ class HueSatWheelWidget (Gtk.Misc):
             memoryview (buf), cairocffi.FORMAT_ARGB32, width, height, stride
         )
 
+        fg_color = self.get_style_context ().get_color (Gtk.StateFlags.NORMAL)
+
         cr.save ()
+
+        cr.set_source_rgba (0, 0, 0, 0)
+        cr.paint ()
+
         cr.set_source_surface (source, 0, 0)
         cr.paint ()
-        fg_color = self.get_style_context ().get_color (Gtk.StateFlags.NORMAL)
+
         cr.set_line_width (1)
         cr.new_path ()
         cr.set_source_rgba (*list (fg_color))
@@ -178,6 +214,30 @@ class HueSatWheelWidget (Gtk.Misc):
 
         cr.restore ()
 
+    def do_draw (self: 'HueSatWheelWidget', pycairo_cr: cairo.Context) -> bool:
+        cr = _UNSAFE_pycairo_context_to_cairocffi (pycairo_cr)
+
+        width = self.get_allocated_width ()
+        height = self.get_allocated_height ()
+        center_x = width / 2.
+        center_y = height / 2.
+
+        if width != self.width or height != self.height:
+            outer = (self.size - 4) / 2.
+            inner = outer - self.ring_width
+
+            self.surface = cr.get_target ().create_similar (
+                cairocffi.CONTENT_COLOR_ALPHA, width, height
+            )
+            context = cairocffi.Context (self.surface)
+
+            self.__draw_ring (context, width, height, center_x, center_y, outer, inner)
+
+            self.width = width
+            self.height = height
+
+        cr.set_source_surface (self.surface)
+        cr.paint ()
         self.__draw_sector (cr, center_x, center_y)
 
         return False
