@@ -83,14 +83,22 @@ class Assistant:
         self.__result_image_box.pack_start (self.__result_image, True, True, 0)
         self.__images_box.pack_start (self.original_image, True, True, 0)
         self.__images_box.pack_start (self.harmonized_image, True, True, 0)
-        self.input_image = None # type: List[str]
+        self.input_images = None # type: List[str]
+        self.current_image = None # type: str
+        self.current_image_idx = 0
 
         self.back_btn = Gtk.Button.new_from_stock ("gtk-go-back")
         self.close_btn = Gtk.Button.new_from_stock ("gtk-close")
+        self.next_btn = Gtk.Button.new_from_stock ("gtk-go-forward")
+        self.cancel_btn = Gtk.Button.new_from_stock ("gtk-cancel")
         self.back_btn.connect ("clicked", self.on_assistant_back)
         self.close_btn.connect ("clicked", self.on_assistant_close)
+        self.next_btn.connect ("clicked", self.on_assistant_next)
+        self.cancel_btn.connect ("clicked", self.on_assistant_cancel)
         self.close_btn.set_size_request (100, -1)
         self.back_btn.set_size_request (100, -1)
+        self.next_btn.set_size_request (100, -1)
+        self.cancel_btn.set_size_request (100, -1)
 
     def on_assistant_close (self: 'Assistant', button: Gtk.Button) -> None:
         self.assistant.close ()
@@ -98,16 +106,34 @@ class Assistant:
     def on_assistant_back (self: 'Assistant', button: Gtk.Button) -> None:
         self.assistant.previous_page ()
 
+    def on_assistant_next (self: 'Assistant', button: Gtk.Button) -> None:
+        self.next_image ()
+
+    def on_assistant_cancel (self: 'Assistant', button: Gtk.Button) -> None:
+        self.stop ()
+
     def apply_assistant_buttons (self: 'Assistant') -> None:
         headerbar = self.get_buttons_headerbar ()
+        headerbar.pack_start (self.cancel_btn)
         headerbar.pack_start (self.back_btn)
         headerbar.pack_end (self.close_btn)
+        headerbar.pack_end (self.next_btn)
         self.back_btn.show ()
-        self.close_btn.show ()
+
+        if self.__current_image_idx >= len (self.__input_images) - 1:
+            self.close_btn.show ()
+            self.next_btn.hide ()
+            self.cancel_btn.hide ()
+        else:
+            self.close_btn.hide ()
+            self.next_btn.show ()
+            self.cancel_btn.show ()
 
     def disable_assistant_buttons (self: 'Assistant') -> None:
         self.back_btn.hide ()
         self.close_btn.hide ()
+        self.next_btn.hide ()
+        self.cancel_btn.hide ()
 
     def get_buttons_headerbar (self: 'Assistant'):
         label = Gtk.Label ()
@@ -220,7 +246,7 @@ class Assistant:
 
         if response == Gtk.ResponseType.OK:
             print ("Selected files: {}".format (", ".join (filenames)))
-            self.input_image = filenames
+            self.input_images = filenames
 
     def __load_icons (self: 'Assistant', folder: str, size: int = 16) -> None:
         icons = {
@@ -238,11 +264,11 @@ class Assistant:
             grid.remove (child)
 
     @property
-    def input_image (self: 'Assistant') -> List[str]:
+    def input_images (self: 'Assistant') -> List[str]:
         return self.__input_images
 
-    @input_image.setter
-    def input_image (self: 'Assistant', value: List[str]) -> None:
+    @input_images.setter
+    def input_images (self: 'Assistant', value: List[str]) -> None:
         self.__input_images = value
 
         Assistant.grid_remove_all (self.__selected_image_preview_grid)
@@ -252,16 +278,36 @@ class Assistant:
             gl_image.set_path (self.__unknown_png)
             gl_image.show_all ()
         else:
+            self.__current_image_idx = 0
             for idx, image in enumerate (self.__input_images):
                 gl_image = GLImage (3, 3, 512, False, 100)
                 self.__selected_image_preview_grid.attach (gl_image, idx % 3, int (idx / 3), 1, 1)
                 gl_image.set_path (image)
                 gl_image.show_all ()
 
-            self.__result_image.set_path (self.__input_images[0])
-            self.original_image.set_path (self.__input_images[0])
-            self.harmonized_image.set_path (self.__input_images[0])
+            self.update_current_image ()
             self.assistant.set_page_complete (
-                self.assistant.get_nth_page (self.assistant.get_current_page ()),
+                self.assistant.get_nth_page (0),
                 True
             )
+
+    def update_current_image (self: 'Assistant') -> None:
+        self.current_image = self.input_images[self.__current_image_idx]
+
+    def next_image (self: 'Assistant') -> None:
+        self.__current_image_idx += 1
+        self.update_current_image ()
+        self.assistant.set_current_page (1)
+
+    @property
+    def current_image (self: 'Assistant') -> str:
+        return self.__current_image
+
+    @current_image.setter
+    def current_image (self: 'Assistant', value: str) -> None:
+        self.__current_image = value
+
+        if value is not None:
+            self.__result_image.set_path (value)
+            self.original_image.set_path (value)
+            self.harmonized_image.set_path (value)
