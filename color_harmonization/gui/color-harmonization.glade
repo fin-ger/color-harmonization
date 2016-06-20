@@ -86,22 +86,7 @@ Choose an image below and click next to start harmonizing the colors of your ima
           </packing>
         </child>
         <child>
-          <object class="GtkGrid" id="selected-image-preview">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="row_spacing">4</property>
-            <property name="column_spacing">4</property>
-            <property name="row_homogeneous">True</property>
-            <property name="column_homogeneous">True</property>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkButton" id="choose_images_button">
@@ -119,6 +104,7 @@ Choose an image below and click next to start harmonizing the colors of your ima
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>

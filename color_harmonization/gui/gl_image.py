@@ -19,12 +19,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 from gi.repository import Gtk
 from color_harmonization.gui.gl_quad_renderer import GLQuadRenderer
 from color_harmonization.gui.gl_widget import GLWidget
-from typing import cast
+from typing import cast, Tuple
 
 class GLImage (GLWidget):
     def __init__ (self: 'GLImage', gl_major_version: int, gl_minor_version: int,
-                  view_size: int = 512, create_histogram: bool = False) -> None:
-        super ().__init__ (GLQuadRenderer (view_size, create_histogram),
+                  view_size: int = 512, create_histogram: bool = False,
+                  size: int = 300) -> None:
+        super ().__init__ (GLQuadRenderer (view_size, create_histogram, size),
                            gl_major_version, gl_minor_version)
 
     def set_path (self: 'GLImage', path: str) -> None:

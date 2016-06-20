@@ -31,12 +31,14 @@ class GLQuadRenderer (GLRenderer):
     log_scale = numpy.log2 (256 * 2**14)
 
     def __init__ (self: 'GLQuadRenderer', view_size: int = 512,
-                  create_histogram: bool = False) -> None:
+                  create_histogram: bool = False, size: int = 300) -> None:
         super ().__init__ ()
         self.__do_harmonization = False
         self.__new_texture = None # type: Image
         self.__view_size = view_size
+        self.__loaded = False
         self.__create_histogram = create_histogram
+        self.__size = size
 
     def load (self: 'GLQuadRenderer') -> None:
         self.make_current ()
@@ -107,8 +109,6 @@ class GLQuadRenderer (GLRenderer):
                                Matrix44.orthogonal_projection (0, 1, 0, 1, 0, 1))
         GL.glUniform1i (self.__uniform_do_harmonization, self.__do_harmonization)
 
-        self.__loaded = True
-
     def load_texture (self: 'GLQuadRenderer', path: str) -> None:
         self.__image_loader_thread = threading.Thread (
             target = self.__image_loader, args = [path]
@@ -140,13 +140,15 @@ class GLQuadRenderer (GLRenderer):
 
             self.__image_width = img.size[0]
             self.__image_height = img.size[1]
-            self.gl_widget.props.width_request = 300
-            self.gl_widget.props.height_request = img.size[1] / float (img.size[0]) * 300;
+            self.gl_widget.props.width_request = self.__size
+            self.gl_widget.props.height_request = img.size[1] / float (img.size[0]) * self.__size
             self.__new_texture = numpy.array (list (img.getdata ()), numpy.uint8)
             warnings.filterwarnings ('default')
 
         timer = threading.Timer (0.01, self.gl_widget.gl_area.queue_draw)
         timer.start ()
+
+        self.__loaded = True
 
     def __load_texture (self: 'GLQuadRenderer') -> None:
         img_data = self.__new_texture
@@ -198,6 +200,9 @@ class GLQuadRenderer (GLRenderer):
     def resize (self: 'GLQuadRenderer', width: int, height: int) -> None:
         super ().resize (width, height)
 
+        if not self.__loaded:
+            return
+
         y = self.__image_height / self.__image_width * \
             self.gl_widget.width / self.gl_widget.height
 
@@ -214,6 +219,9 @@ class GLQuadRenderer (GLRenderer):
         GL.glUniformMatrix4fv (self.__uniform_world, 1, False, self.world)
 
     def render (self: 'GLQuadRenderer') -> None:
+        if not self.__loaded:
+            return
+
         if self.__new_texture is not None:
             self.__load_texture ()
             self.__new_texture = None

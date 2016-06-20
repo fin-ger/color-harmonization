@@ -42,9 +42,7 @@ class Assistant:
             "color-harmonization-assistant"
         ) # type: Gtk.Assistant
         self.assistant.set_wmclass (self.assistant.props.title, self.assistant.props.title)
-        self.__selected_image_preview_box = self.__builder.get_object (
-            "selected-image-preview"
-        ) # type: Gtk.Grid
+        self.__selected_image_preview_grid = Gtk.Grid ()
         self.__result_image_box = self.__builder.get_object (
             "harmonized-image"
         ) # type: Gtk.Box
@@ -63,6 +61,9 @@ class Assistant:
         self.__choose_image_box = self.__builder.get_object (
             "choose-image-box"
         ) # type: Gtk.Box
+        self.__choose_image_box.pack_start (self.__selected_image_preview_grid, False, True, 0)
+        self.__selected_image_preview_grid.props.column_spacing = 8
+        self.__selected_image_preview_grid.props.row_spacing = 8
 
         harmonization_types = [
             "i-type", "V-type", "L-type", "I-type", "T-type", "Y-type", "X-type"
@@ -79,12 +80,10 @@ class Assistant:
         self.original_image = GLImage (3, 3)
         self.harmonized_image = GLImage (3, 3, 512, True)
         self.__result_image = GLImage (3, 3, 2048)
-        self.__selected_image_preview = GLImage (3, 3)
-        self.__selected_image_preview_box.attach (self.__selected_image_preview, 0, 0, 1, 1)
         self.__result_image_box.pack_start (self.__result_image, True, True, 0)
         self.__images_box.pack_start (self.original_image, True, True, 0)
         self.__images_box.pack_start (self.harmonized_image, True, True, 0)
-        self.input_image = None # type: str
+        self.input_image = None # type: List[str]
 
         self.back_btn = Gtk.Button.new_from_stock ("gtk-go-back")
         self.close_btn = Gtk.Button.new_from_stock ("gtk-close")
@@ -221,7 +220,7 @@ class Assistant:
 
         if response == Gtk.ResponseType.OK:
             print ("Selected files: {}".format (", ".join (filenames)))
-            self.assistant.input_image = filenames[0]
+            self.input_image = filenames
 
     def __load_icons (self: 'Assistant', folder: str, size: int = 16) -> None:
         icons = {
@@ -233,21 +232,35 @@ class Assistant:
         for icon, pixbuf in icons.items ():
             Gtk.IconTheme.get_default ().add_builtin_icon (icon, size, pixbuf)
 
+    @staticmethod
+    def grid_remove_all (grid: Gtk.Grid) -> None:
+        for child in grid.get_children ():
+            grid.remove (child)
+
     @property
-    def input_image (self: 'Assistant') -> str:
-        return self.__input_image
+    def input_image (self: 'Assistant') -> List[str]:
+        return self.__input_images
 
     @input_image.setter
-    def input_image (self: 'Assistant', value: str) -> None:
-        self.__input_image = value
+    def input_image (self: 'Assistant', value: List[str]) -> None:
+        self.__input_images = value
 
-        if self.__input_image is None:
-            self.__selected_image_preview.set_path (self.__unknown_png)
+        Assistant.grid_remove_all (self.__selected_image_preview_grid)
+        if self.__input_images is None or len (self.__input_images) <= 0:
+            gl_image = GLImage (3, 3, 512, False, 100)
+            self.__selected_image_preview_grid.attach (gl_image, 0, 0, 1, 1)
+            gl_image.set_path (self.__unknown_png)
+            gl_image.show_all ()
         else:
-            self.__selected_image_preview.set_path (self.__input_image)
-            self.__result_image.set_path (self.__input_image)
-            self.original_image.set_path (self.__input_image)
-            self.harmonized_image.set_path (self.__input_image)
+            for idx, image in enumerate (self.__input_images):
+                gl_image = GLImage (3, 3, 512, False, 100)
+                self.__selected_image_preview_grid.attach (gl_image, idx % 3, int (idx / 3), 1, 1)
+                gl_image.set_path (image)
+                gl_image.show_all ()
+
+            self.__result_image.set_path (self.__input_images[0])
+            self.original_image.set_path (self.__input_images[0])
+            self.harmonized_image.set_path (self.__input_images[0])
             self.assistant.set_page_complete (
                 self.assistant.get_nth_page (self.assistant.get_current_page ()),
                 True
