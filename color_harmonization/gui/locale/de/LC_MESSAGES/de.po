@@ -1,0 +1,142 @@
+# German translations for PACKAGE package.
+# Copyright (C) 2016 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Fin Christensen <christensen.fin@gmail.com>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Color Harmonization\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-20 22:14+0200\n"
+"PO-Revision-Date: 2016-06-20 22:57+0100\n"
+"Last-Translator: Fin Christensen <christensen.fin@gmail.com>\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.5\n"
+
+#: color_harmonization/gui/assistant.py:97
+msgid "Back"
+msgstr "Zurück"
+
+#: color_harmonization/gui/assistant.py:98
+msgid "Close"
+msgstr "Schließen"
+
+#: color_harmonization/gui/assistant.py:99
+msgid "Next"
+msgstr "Weiter"
+
+#: color_harmonization/gui/assistant.py:100
+#: color_harmonization/gui/color-harmonization.glade.h:21
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: color_harmonization/gui/assistant.py:221
+msgid "Choose a filename"
+msgstr "Wähle einen Dateinamen"
+
+#: color_harmonization/gui/assistant.py:239
+msgid "Choose one or more images"
+msgstr "Wähle ein oder mehrere Bilder"
+
+#: color_harmonization/gui/color-harmonization.glade.h:1
+msgid "Warning!"
+msgstr "Warnung!"
+
+#: color_harmonization/gui/color-harmonization.glade.h:2
+msgid "Really cancel the harmonization of the current image?"
+msgstr ""
+"Soll die Harmonisierung des aktuellen Bildes wirklich abgebrochen werden?"
+
+#: color_harmonization/gui/color-harmonization.glade.h:3
+msgid "Nearest sector chooser"
+msgstr "Nächstgelegener Sektor"
+
+#: color_harmonization/gui/color-harmonization.glade.h:4
+msgid "Intellegent sector chooser (graph cut)"
+msgstr "Sektor intelligent wählen (Graphenschnitt)"
+
+#: color_harmonization/gui/color-harmonization.glade.h:5
+msgid "Color Harmonization"
+msgstr "Farbharmonisierung"
+
+#: color_harmonization/gui/color-harmonization.glade.h:6
+msgid ""
+"This assistant will guide you through the process of color harmonization of "
+"your image.\n"
+"\n"
+"Choose an image below and click next to start harmonizing the colors of your "
+"image."
+msgstr ""
+"Dieser Assistent wird Sie durch den Prozess der Farbharmonisierung ihres "
+"Bildes führen.\n"
+"\n"
+"Wählen Sie unten ein Bild aus und klicken Sie auf Weiter, um mit der "
+"Harmonisierung zu beginnen."
+
+#: color_harmonization/gui/color-harmonization.glade.h:9
+msgid "Open Images"
+msgstr "Bilder öffnen"
+
+#: color_harmonization/gui/color-harmonization.glade.h:10
+msgid "Choose an image"
+msgstr "Wähle ein Bild"
+
+#: color_harmonization/gui/color-harmonization.glade.h:11
+msgid "Original"
+msgstr "Original"
+
+#: color_harmonization/gui/color-harmonization.glade.h:12
+msgid "Harmonized"
+msgstr "Harmonisiert"
+
+#: color_harmonization/gui/color-harmonization.glade.h:13
+msgid ""
+"You may configure the harmonization process by selecting a sector chooser "
+"via the dropdown menu. The sector chooser decides which pixel will be "
+"shifted to which hue sector. Choose the one which fits best for you.\n"
+"\n"
+"You may now choose an automatic configuration of the sector templates by "
+"clicking on automatic configuration or choose them manually with the panel "
+"on the left. Try to find the most natural looking configuration.\n"
+"\n"
+"When done click next."
+msgstr ""
+"Sie können den Harmonisierungsprozess konfigurieren, indem Sie eine "
+"Sektorauswahlmethode auswählen. Bei der Auswahl der Sektoren wird "
+"entschieden, welcher Pixel zu welchem Farbwert verschoben wird. Wählen Sie "
+"eine Methode, der für Sie am besten funktioniert.\n"
+"\n"
+"Nun können Sie eine automatische Konfiguration der Sektorvorlagen vornehmen "
+"oder manuell über das linke Steuerelement die Farbwerte einstellen. "
+"Versuchen Sie die am natürlichsten wirkende Konfiguration zu finden.\n"
+"\n"
+"Wenn Sie die Konfiguration abgeschlossen haben klicken Sie auf Weiter,"
+
+#: color_harmonization/gui/color-harmonization.glade.h:18
+msgid "Automatic configuration"
+msgstr "Automatische Konfiguration"
+
+#: color_harmonization/gui/color-harmonization.glade.h:19
+msgid "Configure harmonization"
+msgstr "Harmonisierung konfigurieren"
+
+#: color_harmonization/gui/color-harmonization.glade.h:20
+msgid "Please wait while your image is being harmonized..."
+msgstr "Bitte warten Sie während ihr Bild harmonisiert wird..."
+
+#: color_harmonization/gui/color-harmonization.glade.h:22
+msgid "Harmonize"
+msgstr "Harmonisieren"
+
+#: color_harmonization/gui/color-harmonization.glade.h:23
+msgid "Save image"
+msgstr "Bild speichern"
+
+#: color_harmonization/gui/color-harmonization.glade.h:24
+msgid "Save harmonized image"
+msgstr "Harmonisiertes Bild speichern"

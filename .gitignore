@@ -3,3 +3,5 @@ __pycache__
 *.pyc
 color-harmonization
 .mypy_cache
+*.glade.h
+*.mo

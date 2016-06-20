@@ -29,7 +29,7 @@ init:
 	    pip3 install --user "$$package"; \
 	done < requirements.txt
 
-build: init
+build: init build-lang
 	@echo "Building python package..."
 	@mypy --silent-imports --package color_harmonization
 	@echo "#! /bin/bash" > color-harmonization
@@ -39,3 +39,19 @@ build: init
 run: build
 	@echo "Running application..."
 	@./color-harmonization
+
+lang:
+	@echo "Generating internationalization files..."
+	@mkdir -p color_harmonization/gui/locale/de/LC_MESSAGES
+	@intltool-extract --type=gettext/glade color_harmonization/gui/color-harmonization.glade
+	@xgettext --from-code=UTF-8 --language=Python --keyword=_ --keyword=N_ \
+	--output=color_harmonization/gui/locale/locale.pot \
+	`find . -name "*.py" -type f` \
+	color_harmonization/gui/color-harmonization.glade.h
+	@msginit --input=color_harmonization/gui/locale/locale.pot \
+	--locale=de.UTF-8 --output-file=color_harmonization/gui/locale/de/LC_MESSAGES/de.po
+
+build-lang:
+	@echo "Compiling internationalization files..."
+	@msgfmt --output color_harmonization/gui/locale/de/LC_MESSAGES/color_harmonization.mo \
+	color_harmonization/gui/locale/de/LC_MESSAGES/de.po

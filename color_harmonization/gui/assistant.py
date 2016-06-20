@@ -20,6 +20,7 @@ import glob
 import os
 import locale
 import warnings
+import gettext
 from gi.repository import Gtk, GdkPixbuf, GLib
 from typing import List, Any, cast
 from color_harmonization.handler import Handler
@@ -27,10 +28,23 @@ from color_harmonization.gui.gl_image import GLImage
 from color_harmonization.gui.hue_sat_wheel_widget import HueSatWheelWidget
 from color_harmonization.gui.gl_quad_renderer import GLQuadRenderer
 
+LOCALE_PATH = 'color_harmonization/gui/locale'
+_ = lambda s: s
+
 class Assistant:
     def __init__ (self: 'Assistant', handler: Handler) -> None:
+        lang, encoding = locale.getdefaultlocale ()
+        locale.bindtextdomain ('color_harmonization', LOCALE_PATH)
+        trans = gettext.translation (
+            'color_harmonization', LOCALE_PATH, [lang]
+        )
+
+        global _
+        _ = trans.gettext
+
         self.__load_icons ("color_harmonization/gui/icon")
         self.__builder = Gtk.Builder () # type: Gtk.Builder
+        self.__builder.set_translation_domain ("color_harmonization")
         warnings.filterwarnings ('ignore')
         self.__builder.add_objects_from_file (
             "color_harmonization/gui/color-harmonization.glade",
@@ -87,10 +101,10 @@ class Assistant:
         self.current_image = None # type: str
         self.current_image_idx = 0
 
-        self.back_btn = Gtk.Button.new_from_stock ("gtk-go-back")
-        self.close_btn = Gtk.Button.new_from_stock ("gtk-close")
-        self.next_btn = Gtk.Button.new_from_stock ("gtk-go-forward")
-        self.cancel_btn = Gtk.Button.new_from_stock ("gtk-cancel")
+        self.back_btn = Gtk.Button.new_with_label (_("Back"))
+        self.close_btn = Gtk.Button.new_with_label (_("Close"))
+        self.next_btn = Gtk.Button.new_with_label (_("Next"))
+        self.cancel_btn = Gtk.Button.new_with_label (_("Cancel"))
         self.back_btn.connect ("clicked", self.on_assistant_back)
         self.close_btn.connect ("clicked", self.on_assistant_close)
         self.next_btn.connect ("clicked", self.on_assistant_next)
@@ -99,6 +113,11 @@ class Assistant:
         self.back_btn.set_size_request (100, -1)
         self.next_btn.set_size_request (100, -1)
         self.cancel_btn.set_size_request (100, -1)
+        headerbar = self.get_buttons_headerbar ()
+        headerbar.pack_start (self.cancel_btn)
+        headerbar.pack_start (self.back_btn)
+        headerbar.pack_end (self.close_btn)
+        headerbar.pack_end (self.next_btn)
 
     def on_assistant_close (self: 'Assistant', button: Gtk.Button) -> None:
         self.assistant.close ()
@@ -113,11 +132,6 @@ class Assistant:
         self.stop ()
 
     def apply_assistant_buttons (self: 'Assistant') -> None:
-        headerbar = self.get_buttons_headerbar ()
-        headerbar.pack_start (self.cancel_btn)
-        headerbar.pack_start (self.back_btn)
-        headerbar.pack_end (self.close_btn)
-        headerbar.pack_end (self.next_btn)
         self.back_btn.show ()
 
         if self.__current_image_idx >= len (self.__input_images) - 1:
@@ -144,6 +158,7 @@ class Assistant:
 
     def run (self: 'Assistant') -> int:
         self.assistant.show_all ()
+        self.disable_assistant_buttons ()
         Gtk.main ()
         return 0
 
@@ -211,7 +226,7 @@ class Assistant:
 
     def save_image (self: 'Assistant') -> None:
         dialog = Gtk.FileChooserDialog (
-            title = "Choose a filename", action = Gtk.FileChooserAction.SAVE
+            title = _("Choose a filename"), action = Gtk.FileChooserAction.SAVE
         )
         dialog.add_buttons (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                             Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
@@ -229,7 +244,7 @@ class Assistant:
 
     def open_images (self: 'Assistant') -> None:
         dialog = Gtk.FileChooserDialog (
-            title = "Choose image", action = Gtk.FileChooserAction.OPEN
+            title = _("Choose one or more images"), action = Gtk.FileChooserAction.OPEN
         )
         dialog.add_buttons (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                             Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
