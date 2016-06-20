@@ -30,10 +30,13 @@ class GLQuadRenderer (GLRenderer):
     scale = 2**14
     log_scale = numpy.log2 (256 * 2**14)
 
-    def __init__ (self: 'GLQuadRenderer') -> None:
+    def __init__ (self: 'GLQuadRenderer', view_size: int = 512,
+                  create_histogram: bool = False) -> None:
         super ().__init__ ()
         self.__do_harmonization = False
         self.__new_texture = None # type: Image
+        self.__view_size = view_size
+        self.__create_histogram = create_histogram
 
     def load (self: 'GLQuadRenderer') -> None:
         self.make_current ()
@@ -116,22 +119,24 @@ class GLQuadRenderer (GLRenderer):
         print ("Loading image {}".format (path))
         warnings.filterwarnings ('ignore')
         with Image.open (path) as f:
-            f.thumbnail ((512, 512))
-            hsv = f.convert ("HSV")
+            f.thumbnail ((self.__view_size, self.__view_size))
             img = f.convert ("RGBA")
-            h = hsv.getdata (band = 0)
-            s = hsv.getdata (band = 1)
 
-            hist = [0.0] * 256
-            for idx, hue in enumerate (h):
-                hist[hue] += s[idx]
+            if self.__create_histogram:
+                hsv = f.convert ("HSV")
+                h = hsv.getdata (band = 0)
+                s = hsv.getdata (band = 1)
 
-            hist = numpy.log2 ([
-                (val / (hsv.size[0] * hsv.size[1])) * GLQuadRenderer.scale + 1 for val in hist
-            ])
-            hist = [val / GLQuadRenderer.log_scale for val in hist]
+                hist = [0.0] * 256
+                for idx, hue in enumerate (h):
+                    hist[hue] += s[idx]
 
-            global_variables.App.assistant.set_histogram (hist)
+                hist = numpy.log2 ([
+                    (val / (hsv.size[0] * hsv.size[1])) * GLQuadRenderer.scale + 1 for val in hist
+                ])
+                hist = [val / GLQuadRenderer.log_scale for val in hist]
+
+                global_variables.App.assistant.set_histogram (hist)
 
             self.__image_width = img.size[0]
             self.__image_height = img.size[1]
@@ -140,6 +145,9 @@ class GLQuadRenderer (GLRenderer):
             self.__new_texture = numpy.array (list (img.getdata ()), numpy.uint8)
             warnings.filterwarnings ('default')
 
+        timer = threading.Timer (0.01, self.gl_widget.gl_area.queue_draw)
+        timer.start ()
+
     def __load_texture (self: 'GLQuadRenderer') -> None:
         img_data = self.__new_texture
 
@@ -147,6 +155,7 @@ class GLQuadRenderer (GLRenderer):
         GL.glBindTexture (GL.GL_TEXTURE_2D, 0)
 
         if self.__texture > 0:
+            print ("Deleting texture {}".format (self.__texture))
             GL.glDeleteTextures ([self.__texture])
 
         self.__texture = GL.glGenTextures (1)
@@ -161,6 +170,8 @@ class GLQuadRenderer (GLRenderer):
 
         GL.glTexParameteri (GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri (GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
+        GL.glTexParameteri (GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+        GL.glTexParameteri (GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
 
         self.resize (self.gl_widget.width, self.gl_widget.height)
 
@@ -183,9 +194,6 @@ class GLQuadRenderer (GLRenderer):
         GL.glGenerateMipmap (GL.GL_TEXTURE_2D)
         GL.glBindTexture (GL.GL_TEXTURE_2D, self.__data_texture)
         GL.glUniform1i (self.__uniform_data_texture, 1)
-
-        timer = threading.Timer (10, self.gl_widget.gl_area.queue_draw)
-        timer.start ()
 
     def resize (self: 'GLQuadRenderer', width: int, height: int) -> None:
         super ().resize (width, height)

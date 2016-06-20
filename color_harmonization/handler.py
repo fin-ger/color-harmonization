@@ -40,9 +40,8 @@ class Handler:
                    user_data: Any = None) -> None:
         global_variables.App.assistant.stop ()
 
-    def on_image_file_set (self: 'Handler', file_chooser_button: Gtk.FileChooserButton,
-                           user_data: Any = None) -> None:
-        global_variables.App.assistant.input_image = file_chooser_button.get_filename ()
+    def on_choose_images_clicked (self: 'Handler', button: Gtk.Button) -> None:
+        global_variables.App.assistant.open_images ()
 
     def on_automatic_configuration_clicked (self: 'Handler', button: Gtk.Button,
                                             user_data: Any = None) -> None:

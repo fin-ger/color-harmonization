@@ -22,8 +22,10 @@ from color_harmonization.gui.gl_widget import GLWidget
 from typing import cast
 
 class GLImage (GLWidget):
-    def __init__ (self: 'GLImage', gl_major_version: int, gl_minor_version: int) -> None:
-        super ().__init__ (GLQuadRenderer (), gl_major_version, gl_minor_version)
+    def __init__ (self: 'GLImage', gl_major_version: int, gl_minor_version: int,
+                  view_size: int = 512, create_histogram: bool = False) -> None:
+        super ().__init__ (GLQuadRenderer (view_size, create_histogram),
+                           gl_major_version, gl_minor_version)
 
     def set_path (self: 'GLImage', path: str) -> None:
         cast (GLQuadRenderer, self.renderer).load_texture (path)

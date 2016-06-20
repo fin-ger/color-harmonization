@@ -79,21 +79,23 @@ Choose an image below and click next to start harmonizing the colors of your ima
             <property name="wrap">True</property>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">24</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkImage" id="selected-image-preview">
-            <property name="width_request">400</property>
-            <property name="height_request">200</property>
+          <object class="GtkGrid" id="selected-image-preview">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="icon_size">0</property>
+            <property name="row_spacing">4</property>
+            <property name="column_spacing">4</property>
+            <property name="row_homogeneous">True</property>
+            <property name="column_homogeneous">True</property>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -102,13 +104,17 @@ Choose an image below and click next to start harmonizing the colors of your ima
           </packing>
         </child>
         <child>
-          <object class="GtkFileChooserButton" id="image-chooser-button">
+          <object class="GtkButton" id="choose_images_button">
+            <property name="label" translatable="yes">Open Images</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="filter">image-filefilter</property>
-            <property name="local_only">False</property>
-            <property name="title" translatable="yes">Choose image</property>
-            <signal name="file-set" handler="on_image_file_set" swapped="no"/>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <signal name="clicked" handler="on_choose_images_clicked" swapped="no"/>
+            <style>
+              <class name="suggested-action"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -143,7 +149,7 @@ Choose an image below and click next to start harmonizing the colors of your ima
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
@@ -218,25 +224,10 @@ Choose an image below and click next to start harmonizing the colors of your ima
                 <child>
                   <placeholder/>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -260,7 +251,7 @@ When done click next.</property>
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
@@ -384,13 +375,14 @@ When done click next.</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
+        <property name="spacing">8</property>
         <child>
-          <object class="GtkImage" id="harmonized-image">
-            <property name="width_request">400</property>
-            <property name="height_request">200</property>
+          <object class="GtkBox" id="harmonized-image">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="stock">gtk-missing-image</property>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -404,6 +396,7 @@ When done click next.</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="halign">center</property>
             <signal name="clicked" handler="on_save_button_clicked" swapped="no"/>
             <style>
               <class name="suggested-action"/>
@@ -417,7 +410,7 @@ When done click next.</property>
         </child>
       </object>
       <packing>
-        <property name="page_type">summary</property>
+        <property name="page_type">custom</property>
         <property name="title" translatable="yes">Save harmonized image</property>
         <property name="complete">True</property>
       </packing>

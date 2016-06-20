@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import glob
 import os
+import locale
 import warnings
 from gi.repository import Gtk, GdkPixbuf, GLib
 from typing import List, Any, cast
@@ -41,12 +42,12 @@ class Assistant:
             "color-harmonization-assistant"
         ) # type: Gtk.Assistant
         self.assistant.set_wmclass (self.assistant.props.title, self.assistant.props.title)
-        self.__selected_image_preview = self.__builder.get_object (
+        self.__selected_image_preview_box = self.__builder.get_object (
             "selected-image-preview"
-        ) # type: Gtk.Image
-        self.__result_image = self.__builder.get_object (
+        ) # type: Gtk.Grid
+        self.__result_image_box = self.__builder.get_object (
             "harmonized-image"
-        ) # type: Gtk.Image
+        ) # type: Gtk.Box
         self.__progressbar = self.__builder.get_object (
             "harmonizing-progressbar"
         ) # type: Gtk.ProgressBar
@@ -59,6 +60,9 @@ class Assistant:
         self.__harmonization_type_stack = self.__builder.get_object (
             "harmonization-type-stack"
         ) # type: Gtk.Stack
+        self.__choose_image_box = self.__builder.get_object (
+            "choose-image-box"
+        ) # type: Gtk.Box
 
         harmonization_types = [
             "i-type", "V-type", "L-type", "I-type", "T-type", "Y-type", "X-type"
@@ -73,10 +77,45 @@ class Assistant:
         self.__unknown_svg = "color_harmonization/gui/icon/unknown.svg"
         self.__unknown_png = "color_harmonization/gui/icon/unknown.png"
         self.original_image = GLImage (3, 3)
-        self.harmonized_image = GLImage (3, 3)
+        self.harmonized_image = GLImage (3, 3, 512, True)
+        self.__result_image = GLImage (3, 3, 2048)
+        self.__selected_image_preview = GLImage (3, 3)
+        self.__selected_image_preview_box.attach (self.__selected_image_preview, 0, 0, 1, 1)
+        self.__result_image_box.pack_start (self.__result_image, True, True, 0)
         self.__images_box.pack_start (self.original_image, True, True, 0)
         self.__images_box.pack_start (self.harmonized_image, True, True, 0)
         self.input_image = None # type: str
+
+        self.back_btn = Gtk.Button.new_from_stock ("gtk-go-back")
+        self.close_btn = Gtk.Button.new_from_stock ("gtk-close")
+        self.back_btn.connect ("clicked", self.on_assistant_back)
+        self.close_btn.connect ("clicked", self.on_assistant_close)
+        self.close_btn.set_size_request (100, -1)
+        self.back_btn.set_size_request (100, -1)
+
+    def on_assistant_close (self: 'Assistant', button: Gtk.Button) -> None:
+        self.assistant.close ()
+
+    def on_assistant_back (self: 'Assistant', button: Gtk.Button) -> None:
+        self.assistant.previous_page ()
+
+    def apply_assistant_buttons (self: 'Assistant') -> None:
+        headerbar = self.get_buttons_headerbar ()
+        headerbar.pack_start (self.back_btn)
+        headerbar.pack_end (self.close_btn)
+        self.back_btn.show ()
+        self.close_btn.show ()
+
+    def disable_assistant_buttons (self: 'Assistant') -> None:
+        self.back_btn.hide ()
+        self.close_btn.hide ()
+
+    def get_buttons_headerbar (self: 'Assistant'):
+        label = Gtk.Label ()
+        self.assistant.add_action_widget (label)
+        headerbar = label.get_parent ()
+        headerbar.remove (label)
+        return headerbar
 
     def run (self: 'Assistant') -> int:
         self.assistant.show_all ()
@@ -87,14 +126,29 @@ class Assistant:
         Gtk.main_quit ()
 
     def prepare_next_page (self: 'Assistant') -> None:
+        if self.assistant.get_current_page () > 0:
+            self.back_btn.set_sensitive (True)
+        else:
+            self.back_btn.set_sensitive (False)
+
         if self.assistant.get_current_page () == 2:
-            self.assistant.commit ()
+            self.__progressbar.set_fraction (0)
+            self.assistant.set_page_complete (self.assistant.get_nth_page (2), False)
             self.start_harmonization ()
 
+        if self.assistant.get_current_page () == 3:
+            self.apply_assistant_buttons ()
+        else:
+            self.disable_assistant_buttons ()
+
     def start_harmonization (self: 'Assistant') -> None:
+        self.__cancel_harmonization = False
         self.timeout_id = GLib.timeout_add (50, self.update_progress, None)
 
     def update_progress (self: 'Assistant', user_data: Any = None) -> bool:
+        if self.__cancel_harmonization:
+            return False
+
         new_value = self.__progressbar.get_fraction () + 0.01
 
         if new_value > 1:
@@ -121,14 +175,14 @@ class Assistant:
         response = dialog.run () # type: int
 
         if response == Gtk.ResponseType.YES:
-            self.stop ()
+            self.__cancel_harmonization = True
+            self.assistant.previous_page ()
 
         dialog.destroy ()
 
     def set_histogram (self: 'Assistant', hist: List[float]) -> None:
         for child in self.hue_sat_wheels:
             child.histogram = hist
-
 
     def save_image (self: 'Assistant') -> None:
         dialog = Gtk.FileChooserDialog (
@@ -147,6 +201,27 @@ class Assistant:
 
         if response == Gtk.ResponseType.OK:
             print ("File save location is '{}'".format (newfile))
+
+    def open_images (self: 'Assistant') -> None:
+        dialog = Gtk.FileChooserDialog (
+            title = "Choose image", action = Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_buttons (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                            Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        dialog.set_filter (self.__builder.get_object ("image-filefilter"))
+        dialog.set_select_multiple (True)
+        dialog.set_transient_for (self.assistant)
+
+        response = dialog.run ()
+
+        if response == Gtk.ResponseType.OK:
+            filenames = dialog.get_filenames ()
+
+        dialog.destroy ()
+
+        if response == Gtk.ResponseType.OK:
+            print ("Selected files: {}".format (", ".join (filenames)))
+            self.assistant.input_image = filenames[0]
 
     def __load_icons (self: 'Assistant', folder: str, size: int = 16) -> None:
         icons = {
@@ -167,13 +242,10 @@ class Assistant:
         self.__input_image = value
 
         if self.__input_image is None:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale (self.__unknown_svg, 400, 200, True)
-            self.__selected_image_preview.set_from_pixbuf (pixbuf)
-            self.__result_image.set_from_pixbuf (pixbuf)
+            self.__selected_image_preview.set_path (self.__unknown_png)
         else:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale (self.__input_image, 400, 200, True)
-            self.__selected_image_preview.set_from_pixbuf (pixbuf)
-            self.__result_image.set_from_pixbuf (pixbuf)
+            self.__selected_image_preview.set_path (self.__input_image)
+            self.__result_image.set_path (self.__input_image)
             self.original_image.set_path (self.__input_image)
             self.harmonized_image.set_path (self.__input_image)
             self.assistant.set_page_complete (
