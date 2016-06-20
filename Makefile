@@ -42,16 +42,16 @@ run: build
 
 lang:
 	@echo "Generating internationalization files..."
-	@mkdir -p color_harmonization/gui/locale/de/LC_MESSAGES
+	@mkdir -p color_harmonization/gui/locale/de_DE/LC_MESSAGES
 	@intltool-extract --type=gettext/glade color_harmonization/gui/color-harmonization.glade
 	@xgettext --from-code=UTF-8 --language=Python --keyword=_ --keyword=N_ \
 	--output=color_harmonization/gui/locale/locale.pot \
 	`find . -name "*.py" -type f` \
 	color_harmonization/gui/color-harmonization.glade.h
 	@msginit --input=color_harmonization/gui/locale/locale.pot \
-	--locale=de.UTF-8 --output-file=color_harmonization/gui/locale/de/LC_MESSAGES/de.po
+	--locale=de_DE.UTF-8 --output-file=color_harmonization/gui/locale/de_DE/LC_MESSAGES/de_DE.po
 
 build-lang:
 	@echo "Compiling internationalization files..."
-	@msgfmt --output color_harmonization/gui/locale/de/LC_MESSAGES/color_harmonization.mo \
-	color_harmonization/gui/locale/de/LC_MESSAGES/de.po
+	@msgfmt --output color_harmonization/gui/locale/de_DE/LC_MESSAGES/color_harmonization.mo \
+	color_harmonization/gui/locale/de_DE/LC_MESSAGES/de_DE.po

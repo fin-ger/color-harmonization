@@ -33,14 +33,18 @@ _ = lambda s: s
 
 class Assistant:
     def __init__ (self: 'Assistant', handler: Handler) -> None:
-        lang, encoding = locale.getdefaultlocale ()
-        locale.bindtextdomain ('color_harmonization', LOCALE_PATH)
-        trans = gettext.translation (
-            'color_harmonization', LOCALE_PATH, [lang]
-        )
+        langs = GLib.get_language_names ()
 
-        global _
-        _ = trans.gettext
+        try:
+            locale.bindtextdomain ('color_harmonization', LOCALE_PATH)
+            trans = gettext.translation (
+                'color_harmonization', LOCALE_PATH, langs
+            )
+
+            global _
+            _ = trans.gettext
+        except FileNotFoundError:
+            pass
 
         self.__load_icons ("color_harmonization/gui/icon")
         self.__builder = Gtk.Builder () # type: Gtk.Builder
