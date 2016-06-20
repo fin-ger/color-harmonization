@@ -26,6 +26,8 @@ from PIL import Image
 from color_harmonization.gui.gl_widget import GLWidget, GLRenderer
 from color_harmonization import global_variables
 
+DEBUG = False
+
 class GLQuadRenderer (GLRenderer):
     scale = 2**14
     log_scale = numpy.log2 (256 * 2**14)
@@ -60,19 +62,25 @@ class GLQuadRenderer (GLRenderer):
         GL.glShaderSource (self.fragment_shader, fs_code)
 
         GL.glCompileShader (self.vertex_shader)
-        error_log = GL.glGetShaderInfoLog (self.vertex_shader)
-        print ("Vertex shader: {}".format (error_log.decode ()))
+
+        if DEBUG:
+            error_log = GL.glGetShaderInfoLog (self.vertex_shader)
+            print ("Vertex shader: {}".format (error_log.decode ()))
 
         GL.glCompileShader (self.fragment_shader)
-        error_log = GL.glGetShaderInfoLog (self.fragment_shader)
-        print ("Fragment shader: {}".format (error_log.decode ()))
+
+        if DEBUG:
+            error_log = GL.glGetShaderInfoLog (self.fragment_shader)
+            print ("Fragment shader: {}".format (error_log.decode ()))
 
         GL.glAttachShader (self.program, self.vertex_shader)
         GL.glAttachShader (self.program, self.fragment_shader)
 
         GL.glLinkProgram (self.program)
-        error_log = GL.glGetProgramInfoLog (self.program)
-        print ("Program link: {}".format (error_log.decode ()))
+
+        if DEBUG:
+            error_log = GL.glGetProgramInfoLog (self.program)
+            print ("Program link: {}".format (error_log.decode ()))
 
         self.array_buffer = GL.glGenBuffers (1)
         self.vertex_array = GL.glGenVertexArrays (1)
@@ -116,7 +124,6 @@ class GLQuadRenderer (GLRenderer):
         self.__image_loader_thread.start ()
 
     def __image_loader (self: 'GLQuadRenderer', path: str) -> None:
-        print ("Loading image {}".format (path))
         warnings.filterwarnings ('ignore')
         with Image.open (path) as f:
             f.thumbnail ((self.__view_size, self.__view_size))
@@ -157,11 +164,9 @@ class GLQuadRenderer (GLRenderer):
         GL.glBindTexture (GL.GL_TEXTURE_2D, 0)
 
         if self.__texture > 0:
-            print ("Deleting texture {}".format (self.__texture))
             GL.glDeleteTextures ([self.__texture])
 
         self.__texture = GL.glGenTextures (1)
-        print ("Creating new texture {}".format (self.__texture))
 
         GL.glBindTexture (GL.GL_TEXTURE_2D, self.__texture)
         GL.glTexImage2D (GL.GL_TEXTURE_2D, 0, GL.GL_RGBA,
