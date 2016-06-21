@@ -82,6 +82,7 @@ class HueSatWheelWidget (Gtk.Misc):
         self.__first_move = False
         self.__rotation_offset = 0.0
         self.__temp_size = 0
+        self.__redraw = False
 
         super ().__init__ (*args, **kwargs)
         self.set_size_request (self.size, self.size)
@@ -153,6 +154,7 @@ class HueSatWheelWidget (Gtk.Misc):
     def __draw_ring (self: 'HueSatWheelWidget', cr: cairocffi.Context,
                      width: int, height: int, center_x: float, center_y: float,
                      outer: float, inner: float) -> None:
+        self.__redraw = False
         stride = cairocffi.ImageSurface.format_stride_for_width (cairocffi.FORMAT_ARGB32, width)
         buf = numpy.empty (int (height * stride), dtype = numpy.uint8)
 
@@ -232,7 +234,7 @@ class HueSatWheelWidget (Gtk.Misc):
         center_x = width / 2.
         center_y = height / 2.
 
-        if self.size != self.__temp_size:
+        if self.size != self.__temp_size or self.__redraw:
             outer = (self.size - 4) / 2.
             inner = outer - self.ring_width
 
@@ -261,4 +263,6 @@ class HueSatWheelWidget (Gtk.Misc):
 
     @histogram.setter
     def histogram (self: 'HueSatWheelWidget', value: List[float]) -> None:
+        self.__redraw = True
+        self.queue_draw ()
         self.__hist = value
